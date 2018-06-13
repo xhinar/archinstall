@@ -5,9 +5,9 @@ INS_SWAP_SIZE="$(free -m | awk '/^Mem:/ { printf "+%1.fM", $2+1024 }')"
 
 INS_EFI_PART="${INS_DISK}1"
 INS_SWAP_PART="${INS_DISK}2"
-INS_SLASH_PART="${INS_DISK}3"
+INS_ROOT_PART="${INS_DISK}3"
 
-INS_SLASH_CONTAINER="SLASH"
+INS_ROOT_CONTAINER="ROOT"
 INS_SWAP_CONTAINER="SWAP"
 INS_PASSWORD="4557UK1035ZN"
 
@@ -38,17 +38,17 @@ mkfs.fat -F32 "$INS_EFI_PART"
 ### 02. format fat32 - end ###
 
 ### begin - 03. cryptsetup slash ###
-echo "$INS_PASSWORD" | cryptsetup luksFormat "$INS_SLASH_PART" --key-file -
-echo "$INS_PASSWORD" | cryptsetup open "$INS_SLASH_PART" "$INS_SLASH_CONTAINER" --key-file -
+echo "$INS_PASSWORD" | cryptsetup luksFormat --batch-mode "$INS_ROOT_PART" --key-file -
+echo "$INS_PASSWORD" | cryptsetup open "$INS_ROOT_PART" "$INS_ROOT_CONTAINER" --key-file -
 ### 03. cryptsetup_slash - end ###
 
 
 ### begin - 04. format btrfs ###
-mkfs.btrfs --label SLASH "/dev/mapper/$INS_SLASH_CONTAINER"
+mkfs.btrfs --label SLASH "/dev/mapper/$INS_ROOT_CONTAINER"
 ### 04. format btrfs - end ###
 
 ### begin - 05. mount chroot ###
-mount "/dev/mapper/$INS_SLASH_CONTAINER" /mnt
+mount "/dev/mapper/$INS_ROOT_CONTAINER" /mnt
 mkdir /mnt/boot
 mount "$INS_EFI_PART" /mnt/boot
 ### 05. mount chroot - end ###
