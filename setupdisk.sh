@@ -11,6 +11,13 @@ INS_SLASH_CONTAINER="SLASH"
 INS_SWAP_CONTAINER="SWAP"
 INS_PASSWORD="4557UK1035ZN"
 
+### begin - 00. wipe disk with random data ###
+cryptsetup open --type plain "$INS_DISK" container --key-file /dev/random
+dd if=/dev/zero of=/dev/mapper/container bs=250M status=progress || true
+cryptsetup close container
+### 00. wipe disk with random data - end ###
+
+
 ### begin - 01. create_partitions ###
 sgdisk \
   --clear \
