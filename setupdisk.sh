@@ -70,5 +70,25 @@ swapon "/dev/mapper/$INS_SWAP_CONTAINER"
 ### 08. set as swap - end ###
 
 
+### begin pacstrap script to install the base package group ###
+pacstrap /mnt base base-devel
+### pacstrap script to install the base package group - end ###
+
+### begin - generating the fstab ###
+genfstab -U /mnt >> /mnt/etc/fstab
+### generating the fstab - end ###
+
+### begin - chroot-ing into /mnt ###
+arch-chroot /mnt /bin/bash
+### chroot-ing into /mnt - end ###
+
+### begin ###
+ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+hwclock --systohc --utc
+echo LANG=en_US.UTF-8 > /etc/locale.conf
+export LANG=en_US.UTF-8
+echo P4ndArX > /etc/hostname
+passwd
+### end ###
 
     
