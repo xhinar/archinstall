@@ -11,6 +11,12 @@ INS_ROOT_CONTAINER="ROOT"
 INS_SWAP_CONTAINER="SWAP"
 INS_PASSWORD="4557UK1035ZN"
 
+# Set desired keymap
+loadkeys us
+
+# Set large font
+setfont latarcyrheb-sun32
+
 ### begin - 00. wipe disk with random data ###
 cryptsetup open --type plain "$INS_DISK" container --key-file /dev/random
 dd if=/dev/zero of=/dev/mapper/container bs=250M status=progress || true
@@ -142,14 +148,28 @@ vi /etc/locale.gen
 locale-gen
 echo LANG=en_US.UTF-8 > /etc/locale.conf
 export LANG=en_US.UTF-8
-echo P4ndArX > /etc/hostname
-vi /etc/hosts
+
+# Set desired keymap and font
+echo 'KEYMAP=us' > /etc/vconsole.conf
+echo 'FONT=latarcyrheb-sun32' >> /etc/vconsole.conf
+
+# Set the hostname
+echo 'P4ndArX' > /etc/hostname
+# Add to hosts
+echo '127.0.0.1 localhost' >> /etc/hosts
+echo '::1 localhost' >> /etc/hosts
+echo '127.0.1.1 P4ndArX.localdomain P4ndArX' >> /etc/hosts
+
+#vi /etc/hosts
 """
-127.0.0.1 localhost
-::1     localhost
-127.0.0.1 P4ndArX.localdomain P4ndArX
+127.0.0.1	localhost
+::1		localhost
+127.0.1.1	P4ndArX.localdomain	P4ndArX
 """
 passwd
+groupadd wmx
+useradd -m -g wmx -G users,wheel,storage,power,network -s /bin/bash -c "William Xhinar" boo
+passwd boo
 ### 12. set up your minimum environment as you wish (as per the Beginner's Guide) - end ###
 
 ### begin - 13 - create the /run directory where btrfs-root will eventually be mounted
@@ -167,6 +187,7 @@ vi /etc/mkinitcpio.conf
 #  - remove "fsck" and 
 #  - add "btrfs" at the end
 #HOOKS="base udev autodetect modconf block filesystems keyboard fsck btrfs"
+# Change: HOOKS="base systemd autodetect modconf block keyboard sd-vconsole sd-encrypt filesystems"
 
 # 15 - re-generate your initrd images:
 mkinitcpio -p linux
@@ -176,9 +197,11 @@ mkinitcpio -p linux
 # mount the efivarfs filesystem
 # mount -t efivarfs efivarfs /sys/firmware/efi/efivars
 
-# 17 - install gummiboot as a bootloader
-pacman -S gummiboot
-gummiboot --path=/boot install
+# 17 - Setup systemd-boot
+bootctl --path=/boot install
+
+# Enable Intel microcode updates
+pacman -S intel-ucode
 
 # 18 - set the bootloader global options
 vi /boot/loader/loader.conf
@@ -212,10 +235,17 @@ initrd	/intel-ucode.img
 initrd	/initramfs-linux.img
 options cryptdevice=UUID=33333333-3333-3333-3333-333333333333:luks-33333333-3333-3333-3333-333333333333 root=UUID=44444444-4444-4444-4444-444444444444 rootflags=subvol=__active/rootvol  quiet resume=UUID=22222222-2222-2222-2222-222222222222 ro
 """
+# Get luks-uuid with: `cryptsetup luksUUID /dev/nvme0n1p2`
+# options		rw luks.uuid=<uuid> luks.name=<uuid>=luks root=/dev/mapper/luks rootflags=subvol=@root
 
 # 20 - Proceed with the configuration as from the beginner's guide, if you still need anything
 
 # 21 - reboot into your new install
+exit
+
+umount /mnt/btrfs-active/home
+umount /mnt/btrfs-active
+umount /mnt/btrfs-root
 reboot
 
 # 22 - after rebooting and entering your password, finish setting up arch the way you want it.
