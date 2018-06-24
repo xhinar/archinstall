@@ -137,9 +137,18 @@ arch-chroot /mnt/btrfs-active bash
 ### begin - 12. set up your minimum environment as you wish (as per the Beginner's Guide) ###
 ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 hwclock --systohc --utc
+vi /etc/locale.gen
+# search en_US.UTF-8 and deleted the hashtag in front of it
+locale-gen
 echo LANG=en_US.UTF-8 > /etc/locale.conf
 export LANG=en_US.UTF-8
 echo P4ndArX > /etc/hostname
+vi /etc/hosts
+"""
+127.0.0.1 localhost
+::1     localhost
+127.0.0.1 P4ndArX.localdomain P4ndArX
+"""
 passwd
 ### 12. set up your minimum environment as you wish (as per the Beginner's Guide) - end ###
 
@@ -157,6 +166,7 @@ vi /etc/mkinitcpio.conf
 #  - add "encrypt" before "filesystems"
 #  - remove "fsck" and 
 #  - add "btrfs" at the end
+#HOOKS="base udev autodetect modconf block filesystems keyboard fsck btrfs"
 
 # 15 - re-generate your initrd images:
 mkinitcpio -p linux
@@ -174,8 +184,9 @@ gummiboot --path=/boot install
 vi /boot/loader/loader.conf
 # it should contain:
 """
-default arch
 timeout 4
+default arch
+editor 0
 """
 
 # 19 - set the bootloader entries
@@ -197,7 +208,8 @@ vi /boot/loader/entries/arch.conf
 """
 title Arch Linux
 linux /vmlinuz-linux
-initrd /initramfs-linux.img
+initrd	/intel-ucode.img
+initrd	/initramfs-linux.img
 options cryptdevice=UUID=33333333-3333-3333-3333-333333333333:luks-33333333-3333-3333-3333-333333333333 root=UUID=44444444-4444-4444-4444-444444444444 rootflags=subvol=__active/rootvol  quiet resume=UUID=22222222-2222-2222-2222-222222222222 ro
 """
 
