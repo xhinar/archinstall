@@ -15,7 +15,7 @@ INS_PASSWORD="4557UK1035ZN"
 loadkeys us
 
 # Set large font
-setfont latarcyrheb-sun32
+#setfont latarcyrheb-sun32
 
 ### begin - 00. wipe disk with random data ###
 cryptsetup open --type plain "$INS_DISK" container --key-file /dev/random
